@@ -5,7 +5,7 @@ const axios = require('axios');
 const { config } = require('../../../config/index');
 
 passport.use(
-  new BasicStrategy(async function(email, passport, cb) {
+  new BasicStrategy(async (email, password, cb) => {
     try {
       const { data, status } = await axios({
         url: `${config.apiUrl}/api/auth/sign-in`,
