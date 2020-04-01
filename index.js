@@ -18,6 +18,9 @@ require('./utils/auth/strategies/basic');
 // OAuth strategy
 require('./utils/auth/strategies/oauth');
 
+// Google strategy
+require('./utils/auth/strategies/google');
+
 app.post('/auth/sign-in', async (req, res, next) => {
   passport.authenticate('basic', async (error, data) => {
     try {
@@ -111,6 +114,28 @@ app.get('/auth/google-oauth/callback', passport.authenticate('google-oauth', { s
     next(boom.unauthorized());
   }
   const { token, ...user } = req.user;
+  res.cookie('token', token, {
+    httpOnly: !config.dev,
+    secure: !config.dev,
+  });
+
+  res.status(200).json(user);
+});
+
+app.get(
+  '/auth/google',
+  passport.authenticate('google', {
+    scope: ['email', 'profile', 'openid'],
+  })
+);
+
+app.get('/auth/google/callback', passport.authenticate('google', { session: false }), (req, res, next) => {
+  if (!req.user) {
+    next(boom.unauthorized());
+  }
+
+  const { token, ...user } = req.user;
+
   res.cookie('token', token, {
     httpOnly: !config.dev,
     secure: !config.dev,
